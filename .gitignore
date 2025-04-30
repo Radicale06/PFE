@@ -7,3 +7,8 @@ djangoBackend/db.sqlite3
 djangoBackend/test chroma.ipynb
 docker/chroma
 chroma/
+djangoBackend/api/Services/__pycache__/
+djangoBackend/api/Views/__pycache__/
+djangoBackend/api/__pycache__/
+djangoBackend/api/migrations/
+djangoBackend/djangoBackend/__pycache__/

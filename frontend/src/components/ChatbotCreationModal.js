@@ -4,6 +4,7 @@ import createChatbot from "../Services/CreateChatbot";
 const ChatbotCreationModal = ({ onClose }) => {
   const [name, setName] = useState("");
   const [domain, setDomain] = useState("");
+  const [company_name, setCompanyName] = useState("");
   const [language, setLanguage] = useState("");
   const [style, setStyle] = useState("");
 
@@ -13,6 +14,7 @@ const ChatbotCreationModal = ({ onClose }) => {
   const handleCreateChatbot = async () => {
     const chatbotData = {
       name,
+      company_name,
       domain,
       language,
       style,
@@ -30,9 +32,16 @@ const ChatbotCreationModal = ({ onClose }) => {
         <div className="grid grid-cols-2 gap-4 text-white">
           <input
             type="text"
-            placeholder="Name"
+            placeholder="Chatbot Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            className="p-2 bg-gray-700 rounded-md w-full"
+          />
+          <input
+            type="text"
+            placeholder="Company Name"
+            value={company_name}
+            onChange={(e) => setCompanyName(e.target.value)}
             className="p-2 bg-gray-700 rounded-md w-full"
           />
           <input

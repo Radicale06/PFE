@@ -2,8 +2,112 @@ from selenium import webdriver
 from bs4 import BeautifulSoup
 import time
 import re
+import requests
+from lxml import etree
+import gzip
+from io import BytesIO
+from urllib.parse import urljoin, urlparse
+
+def _fetch_sitemap_content_silent(sitemap_url: str, session: requests.Session):
+    try:
+        response = session.get(sitemap_url, timeout=20, headers={'User-Agent': 'SitemapParser/1.0'})
+        response.raise_for_status()
+        content = response.content
+        if sitemap_url.endswith(".gz") or "gzip" in response.headers.get('Content-Type', '').lower():
+            try:
+                content = gzip.decompress(content)
+            except gzip.BadGzipFile:
+                # Silently try to parse as is or fail if it's truly corrupted
+                pass
+        return content
+    except requests.RequestException:
+        return None
+    except Exception:
+        return None
 
 
+def _parse_sitemap_xml_silent(xml_content: bytes) -> tuple[list[str], list[str]]:
+    page_urls = []
+    child_sitemap_urls = []
+    if not xml_content:
+        return page_urls, child_sitemap_urls
+
+    try:
+        parser = etree.XMLParser(recover=True, remove_blank_text=True, no_network=True)
+        root = etree.fromstring(xml_content, parser=parser)
+
+        sitemap_locs = root.xpath("//*[local-name()='sitemap']/*[local-name()='loc']/text()")
+        if sitemap_locs:
+            for loc in sitemap_locs:
+                child_sitemap_urls.append(loc.strip())
+            return page_urls, child_sitemap_urls
+
+        url_locs = root.xpath("//*[local-name()='url']/*[local-name()='loc']/text()")
+        for loc in url_locs:
+            page_urls.append(loc.strip())
+
+    except etree.XMLSyntaxError:
+        pass
+    except Exception:
+        pass
+
+    return page_urls, child_sitemap_urls
+
+
+def get_all_urls_from_sitemaps_silent(website_root_url: str) -> list[str]:
+    session = requests.Session()
+    all_page_urls = set()
+    sitemaps_to_process = []
+    processed_sitemap_urls = set()
+
+    if not website_root_url.endswith('/'):
+        website_root_url += '/'
+
+    robots_url = urljoin(website_root_url, "robots.txt")
+    try:
+        response = session.get(robots_url, timeout=10)
+        if response.status_code == 200:
+            for line in response.text.splitlines():
+                if line.lower().strip().startswith("sitemap:"):
+                    sitemap_url = line.split(":", 1)[1].strip()
+                    if sitemap_url not in processed_sitemap_urls and sitemap_url not in sitemaps_to_process:
+                        sitemaps_to_process.append(sitemap_url)
+    except requests.RequestException:
+        pass
+
+    common_sitemap_paths = [
+        "sitemap.xml", "sitemap_index.xml", "sitemap.xml.gz",
+        "sitemap_index.xml.gz", "sitemap_news.xml", "sitemaps.xml", "sitemap/sitemap.xml"
+    ]
+    for path in common_sitemap_paths:
+        common_sitemap_url = urljoin(website_root_url, path)
+        if common_sitemap_url not in sitemaps_to_process and common_sitemap_url not in processed_sitemap_urls:
+            sitemaps_to_process.append(common_sitemap_url)
+
+    queue_idx = 0
+    while queue_idx < len(sitemaps_to_process):
+        current_sitemap_url = sitemaps_to_process[queue_idx]
+        queue_idx += 1
+
+        if current_sitemap_url in processed_sitemap_urls:
+            continue
+
+        processed_sitemap_urls.add(current_sitemap_url)
+
+        sitemap_content = _fetch_sitemap_content_silent(current_sitemap_url, session)
+        if sitemap_content:
+            page_urls_from_current, child_sitemaps_from_current = _parse_sitemap_xml_silent(sitemap_content)
+
+            for page_url in page_urls_from_current:
+                all_page_urls.add(page_url)
+
+            for child_sitemap_url in child_sitemaps_from_current:
+                absolute_child_sitemap_url = urljoin(current_sitemap_url, child_sitemap_url)
+                if absolute_child_sitemap_url not in processed_sitemap_urls and \
+                        absolute_child_sitemap_url not in sitemaps_to_process:
+                    sitemaps_to_process.append(absolute_child_sitemap_url)
+
+    return sorted(list(all_page_urls))
 def setup_driver():
     """Set up Selenium Remote WebDriver connected to Selenium Grid."""
     options = webdriver.ChromeOptions()
@@ -69,21 +173,3 @@ def extract_all_text(html):
     return extracted_text.strip()
 
 
-def scrape_and_save(url: str, id):
-    driver = setup_driver()
-
-    try:
-        driver.get(url)
-        time.sleep(5)
-
-        # Get page source (HTML)
-        page_html = driver.page_source
-        driver.quit()
-
-        cleaned_text = extract_all_text(page_html)
-
-        return cleaned_text
-
-    except Exception as e:
-        print(f"Error: {e}")
-        driver.quit()

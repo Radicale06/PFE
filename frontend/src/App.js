@@ -7,6 +7,7 @@ import Dashboard from "./Pages/Dashboard";
 import BotForgePage from "./Pages/Studio";
 import History from "./Pages/history";
 import EditProfile from "./Pages/Profile";
+
 const App = () => {
   return (
     <Router>
@@ -18,6 +19,8 @@ const App = () => {
         <Route path="/studio" element={<BotForgePage />} />
         <Route path="/history" element={<History />} />
         <Route path="/profile" element={<EditProfile />} />
+
+        {/* Add more routes as needed */}
       </Routes>
     </Router>
   );

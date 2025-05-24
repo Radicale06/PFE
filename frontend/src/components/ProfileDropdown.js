@@ -37,12 +37,11 @@ const ProfileDropdown = ({ name = "Guest", onSignOut }) => {
 
           {/* Options */}
           <ul className="text-sm">
-            <li className="flex items-center p-2 hover:bg-gray-800 rounded cursor-pointer">
-              <FaUser className="mr-2" onClick={navigate("/profile")} /> Update
-              profile
-            </li>
-            <li className="flex items-center p-2 hover:bg-gray-800 rounded cursor-pointer">
-              <FaKey className="mr-2" /> Change password
+            <li
+              className="flex items-center p-2 hover:bg-gray-800 rounded cursor-pointer"
+              onClick={() => navigate("/profile")}
+            >
+              <FaUser className="mr-2" /> Update profile
             </li>
             <li className="flex items-center p-2 hover:bg-gray-800 rounded cursor-pointer">
               <FaBug className="mr-2" /> Report a bug

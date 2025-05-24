@@ -7,6 +7,7 @@ import ChatbotCreationModal from "../components/ChatbotCreationModal";
 import CredentialsModel from "../components/CredenetialsModel";
 import ChatbotActionModal from "../components/integrationModel";
 import AnalyticsChart from "../components/AnalyticsChart"; // adjust the path if needed
+import FloatingChatbotCreator from "../components/Chatbot_Agent"; // Import the floating chatbot creator
 
 import {
   BeakerIcon,
@@ -14,6 +15,8 @@ import {
   UserGroupIcon,
   CogIcon,
   HomeIcon,
+  ChatAltIcon,
+  PlusIcon,
 } from "@heroicons/react/outline";
 
 const Dashboard = () => {
@@ -28,6 +31,8 @@ const Dashboard = () => {
   const [activeSection, setActiveSection] = useState("home"); // Track active section
   const [selectedAction, setSelectedAction] = useState(null);
   const [showCredentialsModal, setShowCredentialsModal] = useState(false);
+  // Start with chat assistant always visible
+  const [showChatAssistant, setShowChatAssistant] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -42,6 +47,18 @@ const Dashboard = () => {
       setDepchatbots(data);
     })();
   }, []);
+
+  // Refresh the chatbot list when a new one is created
+  const refreshChatbots = async () => {
+    const data = await fetchChatbots();
+    setChatbots(data);
+  };
+
+  const handleChatbotCreated = async (newChatbot) => {
+    // Refresh the chatbot list
+    await refreshChatbots();
+    // Toast or notification could be added here
+  };
 
   const handleSidebarClick = (section) => {
     setActiveSection(section);
@@ -117,9 +134,6 @@ const Dashboard = () => {
               <CogIcon className="h-6 w-6" /> <span>Settings</span>
             </a>
           </nav>
-          <button className="mt-auto bg-gray-700 text-gray-400 p-2 rounded cursor-not-allowed">
-            Create Bot
-          </button>
         </aside>
 
         {/* Main Content */}
@@ -134,7 +148,6 @@ const Dashboard = () => {
           </div>
 
           {/* Workspace Header */}
-
           <div className="bg-gray-800 p-6 rounded-lg flex items-center space-x-4">
             <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-500 rounded-lg"></div>
             <div>
@@ -161,12 +174,14 @@ const Dashboard = () => {
                     Your workspace has no bots. Get started by creating a new
                     bot
                   </p>
-                  <button
-                    onClick={() => setShowModal(true)}
-                    className="bg-green-500 hover:bg-green-300 text-white px-4 py-2 rounded"
-                  >
-                    + Create Bot
-                  </button>
+                  <div className="flex gap-4 justify-center mt-4">
+                    <button
+                      onClick={() => setShowModal(true)}
+                      className="bg-green-500 hover:bg-green-300 text-white px-4 py-2 rounded"
+                    >
+                      Create Bot
+                    </button>
+                  </div>
                   {showModal && (
                     <ChatbotCreationModal
                       onClose={() => {
@@ -192,31 +207,32 @@ const Dashboard = () => {
                       </button>
                     ))}
                   </div>
-                  {/* Centered "Create" button */}
-                  <div className="flex justify-center mt-2">
+                  {/* Actions buttons */}
+                  <div className="flex justify-center mt-4">
                     <button
                       onClick={() => setShowModal(true)}
                       className="bg-green-500 hover:bg-green-300 text-white px-4 py-2 rounded"
                     >
-                      Create
+                      Create Bot
                     </button>
-                    {showModal && (
-                      <ChatbotCreationModal
-                        onClose={() => setShowModal(false)}
-                      />
-                    )}
                   </div>
+                  {showModal && (
+                    <ChatbotCreationModal onClose={() => setShowModal(false)} />
+                  )}
                 </div>
               )}
             </div>
           )}
+
+          {/* Remove the create-bot section since we don't need it anymore */}
+
           {/* integrations */}
           {activeSection === "integrations" && (
             <div className="mt-6 bg-gray-800 p-6 rounded-lg">
               <h3 className="text-lg font-semibold mb-3 text-center">
                 Chatbots in Production
               </h3>
-              {Depchatbots.length == 0 ? (
+              {Depchatbots.length === 0 ? (
                 <div className="text-center">
                   <p className="text-gray-400 mt-2">
                     Your workspace has no bots in Production Yet
@@ -282,6 +298,12 @@ const Dashboard = () => {
           </div>
         </aside>
       </div>
+
+      {/* Floating chat bot creator - Always visible */}
+      <FloatingChatbotCreator
+        onChatbotCreated={handleChatbotCreated}
+        onClose={() => setShowChatAssistant(false)}
+      />
     </div>
   );
 };

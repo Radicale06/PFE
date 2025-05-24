@@ -22,8 +22,6 @@ const createChatbot = async (chatbotData) => {
       console.error("❌ Failed to create chatbot:", data);
       throw new Error(data.detail || "Failed to create chatbot");
     }
-
-    console.log("✅ Chatbot Created:", data);
     return data; // Return chatbot details if needed
   } catch (error) {
     console.error("🚨 Error creating chatbot:", error.message);

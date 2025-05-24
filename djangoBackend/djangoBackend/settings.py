@@ -90,6 +90,9 @@ CACHES = {
     }
 }
 
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+
+
 # Password validators
 AUTH_PASSWORD_VALIDATORS = [
     {

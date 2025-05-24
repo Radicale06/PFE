@@ -1,10 +1,14 @@
+// HeaderChange.js
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import ProfileDropdown from "./ProfileDropdown";
+import { handleSignOut } from "../Services/logout";
 
 const HeaderChange = ({ name }) => {
-  const handleSignOut = () => {
-    console.log("User signed out");
-    // Implement logout logic here (clear token, redirect, etc.)
+  const navigate = useNavigate();
+
+  const onSignOut = () => {
+    handleSignOut(navigate);
   };
 
   return (
@@ -12,10 +16,9 @@ const HeaderChange = ({ name }) => {
       <div className="flex items-center space-x-4">
         <h2 className="text-lg font-semibold">{name}'s Workspace</h2>
       </div>
-
       <div className="flex items-center space-x-4">
         {/* Profile Dropdown */}
-        <ProfileDropdown name={name} onSignOut={handleSignOut} />
+        <ProfileDropdown name={name} onSignOut={onSignOut} />
       </div>
     </header>
   );

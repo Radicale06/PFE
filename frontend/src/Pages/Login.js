@@ -5,11 +5,9 @@ import SignImage from "../assets/Sign.jpg";
 import handleGoogle from "../Services/handleGoogleLogin";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import ReCAPTCHA from "react-google-recaptcha";
-const client_id =
-  "817599786977-sdkrqubmurk5adm9odstvvqqsa9a2956.apps.googleusercontent.com";
 
-const recaptchaSiteKey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI";
-
+const client_id = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+const recaptchaSiteKey = process.env.REACT_APP_RECAPTCHA_SITE_KEY;
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");

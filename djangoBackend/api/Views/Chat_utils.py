@@ -3,6 +3,7 @@ import requests
 import re
 from ..models import History
 
+
 def get_chat_history(session_id):
     history_key = f"chat_history_{session_id}"
     history = cache.get(history_key, [])
@@ -11,6 +12,7 @@ def get_chat_history(session_id):
 
 def dump_chat_history(chatbot, question, response):
     History(chatbot=chatbot, question=question, response=response).save()
+
 
 def update_chat_history(session_id, user_input, bot_response):
     history_key = f"chat_history_{session_id}"
@@ -25,44 +27,65 @@ def update_chat_history(session_id, user_input, bot_response):
     cache.set(history_key, history, timeout=3600)  # 1 hour expiry
 
 
-def clean_deepseek_response(response):
-    # Remove the entire <think>...</think> block (including content)
-    cleaned = re.sub(r'<think>.*?</think>', '', response, flags=re.DOTALL)
-    # Remove extra whitespace and leading/trailing junk
-    cleaned = cleaned.strip()
-    # Remove any leftover ">>>" prompts (if present)
-    cleaned = re.sub(r'^>>>\s*', '', cleaned)
-    return cleaned
-
-
-def query_deepseek(prompt):
-    url = "http://localhost:11434/api/generate"
+def query_mistral(prompt):
+    """Query Mistral-Small-24B-Instruct-2501 model via vLLM"""
+    url = "http://217.182.211.152:8000/v1/completions"
     headers = {"Content-Type": "application/json"}
     data = {
-        "model": "deepseek-r1:7b",
+        "model": "mistralai/Mistral-Small-24B-Instruct-2501",
         "prompt": prompt,
-        "stream": False
+        "max_tokens": 1000,
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "stop": ["<|endoftext|>", "</s>"]
     }
-    response = requests.post(url, headers=headers, json=data)
 
-    if response.status_code == 200:
-        return response.json().get("response", "No response generated.")
-    else:
-        return f"Error querying DeepSeek: {response.text}"
+    try:
+        response = requests.post(url, headers=headers, json=data, timeout=60)
+
+        if response.status_code == 200:
+            result = response.json()
+            return result["choices"][0]["text"] if result.get("choices") else "No response generated."
+        else:
+            return f"Error querying Mistral: {response.status_code} - {response.text}"
+    except requests.exceptions.Timeout:
+        return "Error: Request timed out. The model may be processing a complex query."
+    except requests.exceptions.RequestException as e:
+        return f"Error connecting to Mistral: {str(e)}"
 
 
-def query_qwen2_5_7b(prompt):
-    url = "http://localhost:11500/api/generate"
+def query_jais(prompt):
+    """Query Jais-13B-Chat model for Arabic via vLLM"""
+    url = "http://217.182.211.152:8001/v1/completions"  # Different port for Jais
     headers = {"Content-Type": "application/json"}
     data = {
-        "model": "qwen2.5:7b",
+        "model": "inceptionai/jais-family-13b-chat",
         "prompt": prompt,
-        "stream": False
+        "max_tokens": 1000,
+        "temperature": 0.7,
+        "top_p": 0.9,
+        "stop": ["<|endoftext|>", "</s>"]
     }
-    response = requests.post(url, headers=headers, json=data)
 
-    if response.status_code == 200:
-        return response.json().get("response", "No response generated.")
-    else:
-        return f"Error querying qwen2.5:7b: {response.text}"
+    try:
+        response = requests.post(url, headers=headers, json=data, timeout=60)
 
+        if response.status_code == 200:
+            result = response.json()
+            return result["choices"][0]["text"] if result.get("choices") else "No response generated."
+        else:
+            return f"Error querying Jais: {response.status_code} - {response.text}"
+    except requests.exceptions.Timeout:
+        return "Error: Request timed out. The model may be processing a complex query."
+    except requests.exceptions.RequestException as e:
+        return f"Error connecting to Jais: {str(e)}"
+
+
+def query_model_by_language(prompt, language):
+    """Route to appropriate model based on language"""
+    if language.lower() == "arabic":
+        response = query_jais(prompt)
+    else:  # English or French
+        response = query_mistral(prompt)
+
+    return response

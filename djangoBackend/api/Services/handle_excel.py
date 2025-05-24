@@ -23,7 +23,7 @@ def handle_excel(df, chatbot_id, doc_name):
         raise ValueError("DataFrame must contain at least one column after cleaning.")
     for index, row in df.iterrows():
         try:
-            combined_text = "| ".join(f"{col.strip()}: {str(value).strip()}" for col, value in row.items() if pd.notnull(value))
+            combined_text = "".join(f"{col.strip()}: {str(value).strip()}, " for col, value in row.items() if pd.notnull(value))
             post_doc_to_chroma(combined_text, chatbot_id, doc_name, index)
             
         except Exception as e:

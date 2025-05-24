@@ -8,13 +8,13 @@ class ChatBot(models.Model):
     domain = models.TextField()
     language = models.TextField()
     style = models.TextField()
+    company_name = models.CharField(max_length=100, default="")
     system_prompt = models.TextField(blank=True)
     is_deployed = models.BooleanField(default=False)
     token = models.CharField(max_length=64, unique=True, blank=True ,null=True)
     api_url = models.CharField(max_length=64, unique=True, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bots")
-
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['name', 'creator'], name='unique_bot_name_per_user')

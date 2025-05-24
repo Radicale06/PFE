@@ -19,9 +19,6 @@ const handleLogin = async (e, username, password, setError, navigate) => {
     if (response.ok) {
       Cookies.set("access_token", data.access, { expires: 1, secure: true });
       Cookies.set("refresh_token", data.refresh, { expires: 1, secure: true });
-      console.log("access_token:", data.access);
-      console.log("refresh_token:", data.refresh);
-      console.log("name:", data.name);
       navigate("/dashboard", { state: { name: data.name } }); // Redirect to home page after successful login
     } else {
       setError(data.detail || "Invalid credentials!");

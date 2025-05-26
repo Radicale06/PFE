@@ -20,6 +20,5 @@ COPY . .
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
 
-RUN python manage.py collectstatic --noinput
 
-ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT ["gunicorn", "djangoBackend.wsgi:application", "--bind" ,"0.0.0.0:8000"]

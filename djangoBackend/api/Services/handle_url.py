@@ -118,7 +118,7 @@ def setup_driver():
 
     # Connect to Selenium Grid running locally in Docker
     driver = webdriver.Remote(
-        command_executor="http://localhost:4444/wd/hub",  # Selenium Hub URL
+        command_executor="http://selenium-hub:4444/wd/hub",  # Selenium Hub URL
         options=options
     )
     return driver

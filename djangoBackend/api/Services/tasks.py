@@ -7,6 +7,7 @@ from .handle_Other_Files import handlePDF, handleTXT, handleDOC
 @shared_task
 def process_uploaded_file(chatbot_id, docname, file_path, file_extension):
     try:
+        print("going to process file")
         with open(file_path, "rb") as f:
             if file_extension in [".xls", ".xlsx", ".csv"]:
                 if file_extension == ".csv":
@@ -27,6 +28,7 @@ def process_uploaded_file(chatbot_id, docname, file_path, file_extension):
             else:
                 # Optional: log unsupported format
                 print(f"Unsupported format: {file_extension}")
+        print(("finished processing file"))
 
     except Exception as e:
         print(f"Error in background task: {e}")

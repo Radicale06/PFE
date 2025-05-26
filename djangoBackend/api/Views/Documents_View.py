@@ -33,8 +33,9 @@ class DocumentCreateView(generics.CreateAPIView):
                 temp_path = temp_file.name
 
             # Trigger Celery task
+            print("going to celery")
             process_uploaded_file.delay(chatbot_id, file.name, temp_path, file_extension)
-
+            print("celery done")
             # Save metadata
             data = request.data.copy()
             data["type"] = file_extension

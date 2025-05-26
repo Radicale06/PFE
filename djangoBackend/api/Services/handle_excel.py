@@ -4,7 +4,7 @@ from ..Views.chroma_utils import post_doc_to_chroma
 import pandas as pd
 
 # Connect to ChromaDB running in Docker
-chroma_client = chromadb.HttpClient(host="chroma", port=5000)
+chroma_client = chromadb.HttpClient(host="localhost", port=5000)
 def clean_text(text):
     if not isinstance(text, str):
         return ""  # Handle cases where text might be None or not a string

@@ -1,6 +1,6 @@
 import chromadb
 
-chroma_client = chromadb.HttpClient(host="chroma", port=5000)
+chroma_client = chromadb.HttpClient(host="localhost", port=5000)
 def get_doc_from_chroma(querry, chatbot_id):
     collections = chroma_client.get_collection("BotForge")
     results = collections.query(

@@ -1,0 +1,20 @@
+frontend/node_modules
+djangoBackend/api/migrations/
+djangoBackend/api/Views/__pycache__/
+djangoBackend/api/__pycache__/
+djangoBackend/api/Services/__pycache__/
+djangoBackend/djangoBackend/__pycache__/
+frontend/.env
+djangoBackend/.idea
+djangoBackend/media
+djangoBackend/.ipynb_checkpoints
+djangoBackend/venv/
+djangoBackend/db.sqlite3
+djangoBackend/test chroma.ipynb
+djangoBackend/.env
+docker/
+
+
+
+
+

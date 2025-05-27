@@ -5,6 +5,7 @@ djangoBackend/api/__pycache__/
 djangoBackend/api/Services/__pycache__/
 djangoBackend/djangoBackend/__pycache__/
 frontend/.env
+chroma/
 djangoBackend/.idea
 djangoBackend/media
 djangoBackend/.ipynb_checkpoints

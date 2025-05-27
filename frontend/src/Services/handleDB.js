@@ -1,5 +1,5 @@
 import Cookies from "js-cookie";
-
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 const handleTableSubmit = async (chatbotId, dbType, credentials) => {
   const token = Cookies.get("access_token");
 
@@ -14,17 +14,14 @@ const handleTableSubmit = async (chatbotId, dbType, credentials) => {
   };
 
   try {
-    const response = await fetch(
-      "http://localhost:8000/api/connect_database/",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(requestData),
-      }
-    );
+    const response = await fetch(`${API_BASE_URL}/api/connect_database/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(requestData),
+    });
 
     const responseText = await response.text();
 

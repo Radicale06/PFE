@@ -1,5 +1,6 @@
 import Cookies from "js-cookie";
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 const fetchHistoryData = async (chatbot_id) => {
   try {
     const token = Cookies.get("access_token"); // Get the token from cookies
@@ -9,7 +10,7 @@ const fetchHistoryData = async (chatbot_id) => {
     }
 
     // Send the POST request to fetch the history data
-    const response = await fetch("http://localhost:8000/api/get-history/", {
+    const response = await fetch(`${API_BASE_URL}/api/get-history/`, {
       method: "POST", // Use POST to send the chatbot_id in the body
       headers: {
         "Content-Type": "application/json",

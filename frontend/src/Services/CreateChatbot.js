@@ -1,5 +1,6 @@
 import Cookies from "js-cookie";
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 const createChatbot = async (chatbotData) => {
   try {
     const token = Cookies.get("access_token");
@@ -7,7 +8,7 @@ const createChatbot = async (chatbotData) => {
       console.error("🚨 No authentication token found! Please log in.");
       return;
     }
-    const response = await fetch("http://localhost:8000/api/chatbots/create/", {
+    const response = await fetch(`${API_BASE_URL}/api/chatbots/create/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

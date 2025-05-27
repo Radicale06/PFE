@@ -1,3 +1,4 @@
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 const handleSignUp = async (
   e,
   first_name,
@@ -11,7 +12,7 @@ const handleSignUp = async (
   e.preventDefault();
 
   try {
-    const response = await fetch("http://localhost:8000/api/user/register/", {
+    const response = await fetch(`${API_BASE_URL}/api/user/register/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

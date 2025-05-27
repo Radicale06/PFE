@@ -4,7 +4,7 @@ import logging
 import requests
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.core.cache import cache
 from django.contrib.auth import get_user_model
 from ..models import ChatBot

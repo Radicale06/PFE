@@ -1,9 +1,10 @@
 import Cookies from "js-cookie";
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 const handleModalSubmit = async (formData) => {
   const token = Cookies.get("access_token");
 
   try {
-    const response = await fetch("http://localhost:8000/api/upload/", {
+    const response = await fetch(`${API_BASE_URL}/api/upload/`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,

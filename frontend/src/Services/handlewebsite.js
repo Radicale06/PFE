@@ -1,10 +1,11 @@
 import Cookies from "js-cookie";
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 const handleWebsiteScrape = async (websiteUrl, chatbotId) => {
   const token = Cookies.get("access_token");
 
   try {
-    const response = await fetch("http://localhost:8000/api/scrape_web/", {
+    const response = await fetch(`${API_BASE_URL}/api/scrape_web/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

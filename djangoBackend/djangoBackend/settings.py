@@ -8,9 +8,10 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-scdejq5o2xs1&*ippxwuw)hao(l6cr@p1e3itn!q)ffbxr3slw'
-DEBUG = True
-ALLOWED_HOSTS = ["*"]
+# === Django Core Settings ===
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",")
 
 # Applications
 INSTALLED_APPS = [
@@ -56,12 +57,12 @@ ROOT_URLCONF = 'djangoBackend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # Optional if you use templates
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
-                'django.template.context_processors.request',  # Required by allauth
+                'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
@@ -71,27 +72,30 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'djangoBackend.wsgi.application'
 
-# Database (default: SQLite)
+# Database: PostgreSQL
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('POSTGRES_HOST'),
+        'PORT': os.getenv('POSTGRES_PORT', '5432'),
     }
 }
 
-# Caching
+# Caching (optional Redis)
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://localhost:6379/1",
+        "LOCATION": f"redis://{os.getenv('REDIS_HOST')}:{int(os.getenv('REDIS_PORT'))}/1",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     }
 }
 
-CELERY_BROKER_URL = "redis://localhost:6379/0"
-
+CELERY_BROKER_URL = f"redis://{os.getenv('REDIS_HOST')}:{int(os.getenv('REDIS_PORT'))}/0"
 
 # Password validators
 AUTH_PASSWORD_VALIDATORS = [
@@ -141,14 +145,15 @@ SIMPLE_JWT = {
 # Authentication backends
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',  # FIXED HERE
+    'allauth.account.auth_backends.AuthenticationBackend',
 )
 
-# CORS
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS & CSRF
+CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
 CORS_ALLOW_CREDENTIALS = True
 
-# Google OAuth (with env vars)
+# Google OAuth
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
         "SCOPE": ["profile", "email"],
@@ -158,14 +163,7 @@ SOCIALACCOUNT_PROVIDERS = {
             "secret": os.getenv("GOOGLE_SECRET"),
             "key": ""
         },
-    "CALLBACK_URL": "http://localhost:8000/accounts/google/login/callback/",
+        "CALLBACK_URL": os.getenv("GOOGLE_CALLBACK_URL"),
     }
 }
 
-# CSRF for frontend (if needed)
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-]
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
-]

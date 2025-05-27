@@ -17,6 +17,7 @@ import {
 import Cookies from "js-cookie";
 import dayjs from "dayjs";
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 const AnalyticsChart = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,7 +29,7 @@ const AnalyticsChart = () => {
     const fetchAnalytics = async () => {
       const token = Cookies.get("access_token");
       try {
-        const response = await fetch("http://localhost:8000/api/analytics/", {
+        const response = await fetch(`${API_BASE_URL}/api/analytics/`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

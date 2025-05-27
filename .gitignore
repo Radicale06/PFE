@@ -1,10 +1,12 @@
 frontend/node_modules
+frontend/.env
 djangoBackend/.idea
 djangoBackend/media
 djangoBackend/.ipynb_checkpoints
 djangoBackend/venv/
 djangoBackend/db.sqlite3
 djangoBackend/test chroma.ipynb
+djangoBackend/.env
 docker/chroma
 chroma/
 djangoBackend/api/Services/__pycache__/

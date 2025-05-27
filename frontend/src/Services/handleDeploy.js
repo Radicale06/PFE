@@ -1,5 +1,6 @@
 import Cookies from "js-cookie";
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 const handleDeploy = async (chatbotId) => {
   const token = Cookies.get("access_token");
 
@@ -9,7 +10,7 @@ const handleDeploy = async (chatbotId) => {
   }
 
   try {
-    const response = await fetch(`http://localhost:8000/deploy/${chatbotId}/`, {
+    const response = await fetch(`${API_BASE_URL}/deploy/${chatbotId}/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

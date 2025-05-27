@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 // SVG icons as components
 const SendIcon = () => (
   <svg
@@ -69,8 +70,7 @@ const FloatingChatbotCreator = ({ onChatbotCreated, onClose }) => {
   const messagesEndRef = useRef(null);
 
   // API endpoint
-  const API_URL = "http://localhost:8000/api/chatbot-creator/";
-
+  const API_URL = `${API_BASE_URL}/api/chatbot-creator/`;
   // Initialize conversation on component mount
   useEffect(() => {
     startConversation();

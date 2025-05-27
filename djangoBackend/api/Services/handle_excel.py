@@ -1,10 +1,13 @@
+import os
 import re
 import chromadb
 from ..Views.chroma_utils import post_doc_to_chroma
 import pandas as pd
+from dotenv import load_dotenv
+load_dotenv()
 
 # Connect to ChromaDB running in Docker
-chroma_client = chromadb.HttpClient(host="localhost", port=5000)
+chroma_client = chromadb.HttpClient(host=os.getenv('CHROMA_DB_HOST'), port=int(os.getenv('CHROMA_DB_PORT')))
 def clean_text(text):
     if not isinstance(text, str):
         return ""  # Handle cases where text might be None or not a string

@@ -65,8 +65,6 @@ class QueryView(APIView):
 
             # Query the appropriate model based on language
             model_response = query_model_by_language(final_prompt, chatbot.language)
-
-            # Update chat history
             update_chat_history(session_id, query, model_response)
 
             # Save to database

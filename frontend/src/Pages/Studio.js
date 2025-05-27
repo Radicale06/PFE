@@ -20,6 +20,8 @@ import Cookies from "js-cookie";
 import DeployModal from "../components/DeployModal";
 import handleDeploy from "../Services/handleDeploy";
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
 const Studio = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -87,7 +89,7 @@ const Studio = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/documents/?chatbot=${chatbot.id}`,
+        `${API_BASE_URL}/api/documents/?chatbot=${chatbot.id}`,
         {
           method: "GET",
           headers: {
@@ -138,7 +140,7 @@ const Studio = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:8000/api/test_ChatBot/", {
+      const response = await fetch(`${API_BASE_URL}/api/test_ChatBot/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -289,7 +291,7 @@ const Studio = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/chatbots/${chatbot.id}/`,
+        `${API_BASE_URL}/api/chatbots/${chatbot.id}/`,
         {
           method: "PATCH",
           headers: {
@@ -342,7 +344,7 @@ const Studio = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/chatbots/${chatbot.id}/`,
+        `${API_BASE_URL}/api/chatbots/${chatbot.id}/`,
         {
           method: "PATCH",
           headers: {
@@ -391,7 +393,7 @@ const Studio = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/chatbots/${chatbot.id}/`,
+        `${API_BASE_URL}/api/chatbots/${chatbot.id}/`,
         {
           method: "DELETE",
           headers: {

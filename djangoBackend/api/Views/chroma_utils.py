@@ -1,6 +1,8 @@
 import chromadb
-
-chroma_client = chromadb.HttpClient(host="localhost", port=5000)
+from dotenv import load_dotenv
+load_dotenv()
+import os
+chroma_client = chromadb.HttpClient(host=os.getenv('CHROMA_DB_HOST'), port=int(os.getenv('CHROMA_DB_PORT')))
 def get_doc_from_chroma(querry, chatbot_id):
     collections = chroma_client.get_collection("BotForge")
     results = collections.query(
@@ -9,7 +11,6 @@ def get_doc_from_chroma(querry, chatbot_id):
         where={"chatbot_id": {"$eq": chatbot_id}}
     )
     return results
-
 
 def post_doc_to_chroma(doc, chatbot_id, doc_name, index):
     chroma_collection = chroma_client.get_or_create_collection("BotForge")

@@ -1,11 +1,11 @@
 import Cookies from "js-cookie";
-
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 const fetchChatbotDocuments = async (chatbotId) => {
   const token = Cookies.get("access_token");
 
   try {
     const response = await fetch(
-      `http://localhost:8000/api/documents/?chatbot=${chatbotId}`,
+      `${API_BASE_URL}/api/documents/?chatbot=${chatbotId}`,
       {
         method: "GET",
         headers: {

@@ -1,4 +1,6 @@
 import Cookies from "js-cookie";
+
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 const fetchChatbots = async () => {
   const token = Cookies.get("access_token");
   if (!token) {
@@ -7,15 +9,12 @@ const fetchChatbots = async () => {
   }
 
   try {
-    const response = await fetch(
-      "http://localhost:8000/api/deployed-chatbots/",
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`, // Include JWT token
-        },
-      }
-    );
+    const response = await fetch(`${API_BASE_URL}/api/deployed-chatbots/`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`, // Include JWT token
+      },
+    });
 
     const data = await response.json();
 

@@ -1,7 +1,10 @@
 from django.core.cache import cache
 import requests
 import re
+import os
 from ..models import History
+from dotenv import load_dotenv
+load_dotenv()
 
 
 def get_chat_history(session_id):
@@ -29,7 +32,7 @@ def update_chat_history(session_id, user_input, bot_response):
 
 def query_mistral(prompt):
     """Query Mistral-Small-24B-Instruct-2501 model via vLLM"""
-    url = "http://217.182.211.152:8000/v1/completions"
+    url = os.getenv('MISTRAL_URL')
     headers = {"Content-Type": "application/json"}
     data = {
         "model": "mistralai/Mistral-Small-24B-Instruct-2501",
@@ -56,7 +59,7 @@ def query_mistral(prompt):
 
 def query_jais(prompt):
     """Query Jais-13B-Chat model for Arabic via vLLM"""
-    url = "http://217.182.211.152:8001/v1/completions"  # Different port for Jais
+    url = os.getenv('JAIS_13b_API') # Different port for Jais
     headers = {"Content-Type": "application/json"}
     data = {
         "model": "inceptionai/jais-family-13b-chat",

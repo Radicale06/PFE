@@ -1,0 +1,139 @@
+version: "3.9"
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:latest
+    container_name: postgres_db
+    environment:
+      POSTGRES_DB: botforge
+      POSTGRES_USER: oussama
+      POSTGRES_PASSWORD: 1234
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - app_network
+
+  # Redis
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - app_network
+
+  # ChromaDB
+  chromadb:
+    image: chromadb/chroma
+    container_name: chroma
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./config.yaml:/config.yaml
+      - ./chroma-data:/data
+
+  # Django Backend
+  backend:
+    build:
+      context: ./djangoBackend
+      dockerfile: Dockerfile
+    container_name: django_backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+      - chromadb
+    environment:
+      - DJANGO_SECRET_KEY=django-insecure-scdejq5o2xs1&*ippxwuw)hao(l6cr@p1e3itn!q)ffbxr3slw
+      - DEBUG=False
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,backend
+      - POSTGRES_DB=botforge
+      - POSTGRES_USER=oussama
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - SELINIUM=selenium-hub
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=5000
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost
+      - CSRF_TRUSTED_ORIGINS=http://localhost:3000,http://localhost
+      - GOOGLE_CLIENT_ID=817599786977-sdkrqubmurk5adm9odstvvqqsa9a2956.apps.googleusercontent.com
+      - GOOGLE_SECRET=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
+      - GOOGLE_CALLBACK_URL=http://localhost:8000/accounts/google/login/callback/
+    volumes:
+      - ./djangoBackend:/app
+    networks:
+      - app_network
+
+  # React Frontend with Nginx
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: react_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - app_network
+
+  # Selenium Hub
+  selenium-hub:
+    image: selenium/hub
+    container_name: selenium-hub
+    ports:
+      - "4442:4442"
+      - "4443:4443"
+      - "4444:4444"
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_ENABLE_TRACING=false
+    networks:
+      - app_network
+
+  # Chrome Node 1
+  chrome-node-1:
+    image: selenium/node-chrome
+    container_name: chrome-node-1
+    shm_size: 2gb
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_ENABLE_TRACING=false
+    depends_on:
+      - selenium-hub
+    networks:
+      - app_network
+
+  # Chrome Node 2
+  chrome-node-2:
+    image: selenium/node-chrome
+    container_name: chrome-node-2
+    shm_size: 2gb
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_ENABLE_TRACING=false
+    depends_on:
+      - selenium-hub
+    networks:
+      - app_network
+
+volumes:
+  postgres_data:
+  chroma_data:
+
+networks:
+  app_network:
+    driver: bridge

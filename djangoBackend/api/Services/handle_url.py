@@ -8,6 +8,8 @@ from lxml import etree
 import gzip
 from io import BytesIO
 from urllib.parse import urljoin, urlparse
+from dotenv import load_dotenv
+load_dotenv()
 
 def _fetch_sitemap_content_silent(sitemap_url: str, session: requests.Session):
     try:

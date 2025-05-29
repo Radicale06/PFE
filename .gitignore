@@ -1,5 +1,5 @@
 frontend/node_modules
-djangoBackend/api/migrations/
+djangoBackend/api/migrations/*
 !djangoBackend/api/migrations/__init__.py
 djangoBackend/api/Views/__pycache__/
 djangoBackend/api/__pycache__/

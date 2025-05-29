@@ -7,7 +7,7 @@ WORKDIR /app
 COPY . .
 
 # Install dependencies
-RUN npm Install
+RUN npm ci
 
 # Set environment variables for build
 ENV REACT_APP_API_BASE_URL=http://backend:8000

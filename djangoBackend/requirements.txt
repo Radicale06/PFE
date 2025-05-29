@@ -25,3 +25,4 @@ cockroachdb
 psycopg2-binary
 pyodbc
 django-redis
+gunicorn

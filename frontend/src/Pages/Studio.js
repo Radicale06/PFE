@@ -148,8 +148,7 @@ const Studio = () => {
         },
         body: JSON.stringify({
           chatbot_id: chatbot.id,
-          session_id: 10,
-          company_name: "Linedata",
+          session_id: Cookies.get("session_id"),
           message: input,
         }),
       });

@@ -1,10 +1,9 @@
 version: "3.9"
 
 services:
-  # PostgreSQL Database
-  db:
+  postgres-db:
     image: postgres:latest
-    container_name: postgres_db
+    container_name: postgres-db
     environment:
       POSTGRES_DB: botforge
       POSTGRES_USER: oussama
@@ -14,7 +13,7 @@ services:
     ports:
       - "5432:5432"
     networks:
-      - app_network
+      - botforge
 
   # Redis
   redis:
@@ -23,17 +22,18 @@ services:
     ports:
       - "6379:6379"
     networks:
-      - app_network
+      - botforge
 
   # ChromaDB
-  chromadb:
+  chroma:
     image: chromadb/chroma
     container_name: chroma
     ports:
-      - "5000:5000"
+      - "5000:8000"
     volumes:
-      - ./config.yaml:/config.yaml
       - ./chroma-data:/data
+    networks:
+      - botforge
 
   # Django Backend
   backend:
@@ -44,32 +44,33 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - db
+      - postgres-db
       - redis
-      - chromadb
+      - chroma
     environment:
       - DJANGO_SECRET_KEY=django-insecure-scdejq5o2xs1&*ippxwuw)hao(l6cr@p1e3itn!q)ffbxr3slw
       - DEBUG=False
-      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,backend
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,backend,frontend
       - POSTGRES_DB=botforge
       - POSTGRES_USER=oussama
       - POSTGRES_PASSWORD=1234
-      - POSTGRES_HOST=db
+      - POSTGRES_HOST=postgres-db
       - POSTGRES_PORT=5432
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - SELINIUM=selenium-hub
-      - CHROMA_HOST=chromadb
-      - CHROMA_PORT=5000
-      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost
-      - CSRF_TRUSTED_ORIGINS=http://localhost:3000,http://localhost
+      - CHROMA_HOST=chroma
+      - CHROMA_PORT=8000
+      - SELINIUM=http://selenium-hub:4444/wd/hub
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost,frontend
+      - CSRF_TRUSTED_ORIGINS=http://localhost:3000,http://localhost,frontend
       - GOOGLE_CLIENT_ID=817599786977-sdkrqubmurk5adm9odstvvqqsa9a2956.apps.googleusercontent.com
       - GOOGLE_SECRET=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
       - GOOGLE_CALLBACK_URL=http://localhost:8000/accounts/google/login/callback/
     volumes:
       - ./djangoBackend:/app
     networks:
-      - app_network
+      - botforge
 
   # React Frontend with Nginx
   frontend:
@@ -82,7 +83,7 @@ services:
     depends_on:
       - backend
     networks:
-      - app_network
+      - botforge
 
   # Selenium Hub
   selenium-hub:
@@ -98,7 +99,7 @@ services:
       - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
       - SE_ENABLE_TRACING=false
     networks:
-      - app_network
+      - botforge
 
   # Chrome Node 1
   chrome-node-1:
@@ -113,7 +114,7 @@ services:
     depends_on:
       - selenium-hub
     networks:
-      - app_network
+      - botforge
 
   # Chrome Node 2
   chrome-node-2:
@@ -128,12 +129,12 @@ services:
     depends_on:
       - selenium-hub
     networks:
-      - app_network
+      - botforge
 
 volumes:
   postgres_data:
   chroma_data:
 
 networks:
-  app_network:
+  botforge:
     driver: bridge

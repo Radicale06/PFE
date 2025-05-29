@@ -1,2 +1,9 @@
 venv/
+.ipynb_checkpoints/
 __pycache__/
+**/__pycache__/
+api/migrations/*.py
+!api/migrations/__init__.py
+test chroma.ipynb
+Dockerfile
+db.sqlite3

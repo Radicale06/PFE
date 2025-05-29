@@ -10,6 +10,7 @@ const handleSignUp = async (
   navigate
 ) => {
   e.preventDefault();
+  console.log("API_BASE_URL:", API_BASE_URL);
 
   try {
     const response = await fetch(`${API_BASE_URL}/api/user/register/`, {

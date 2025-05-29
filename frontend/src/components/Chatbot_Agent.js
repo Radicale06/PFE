@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-
+import Cookies from "js-cookie";
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 // SVG icons as components
 const SendIcon = () => (
@@ -61,7 +61,7 @@ const CloseIcon = () => (
 );
 
 const FloatingChatbotCreator = ({ onChatbotCreated, onClose }) => {
-  const [sessionId, setSessionId] = useState("");
+  const session_id = Cookies.get("session_id");
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -94,7 +94,6 @@ const FloatingChatbotCreator = ({ onChatbotCreated, onClose }) => {
     setIsLoading(true);
     try {
       const response = await axios.post(API_URL, { message: "" });
-      setSessionId(response.data.session_id);
       setMessages([{ sender: "bot", text: response.data.message }]);
     } catch (error) {
       console.error("Error starting conversation:", error);
@@ -122,7 +121,7 @@ const FloatingChatbotCreator = ({ onChatbotCreated, onClose }) => {
     try {
       // Send message to backend
       const response = await axios.post(API_URL, {
-        session_id: sessionId,
+        session_id: session_id,
         message: userMessage,
       });
 

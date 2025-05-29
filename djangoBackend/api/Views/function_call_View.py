@@ -30,11 +30,11 @@ class ChatbotCreatorView(APIView):
         # Get data from request
         data = request.data
         message = data.get("message", "").strip()
-        session_id = data.get("session_id", str(uuid.uuid4()))
+        session_id = data.get("session_id")
 
         # Get conversation history from cache
         conversation_key = f"chatbot_creator_{session_id}"
-        conversation_history = cache.get(conversation_key, [])
+        conversation_history = cache.get(session_id, [])
 
         # First interaction - send greeting
         if not message:
@@ -44,8 +44,8 @@ class ChatbotCreatorView(APIView):
                 "Would you like to create a chatbot today?"
             )
             conversation_history.append({"role": "assistant", "content": greeting})
-            cache.set(conversation_key, conversation_history, timeout=3600)
-            return Response({"session_id": session_id, "message": greeting})
+            cache.set(conversation_key, conversation_history, timeout=7200)
+            return Response({"message": greeting})
 
         # Add user message to history
         conversation_history.append({"role": "user", "content": message})

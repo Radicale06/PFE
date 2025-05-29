@@ -21,18 +21,18 @@ def update_chat_history(session_id, user_input, bot_response):
     history_key = f"chat_history_{session_id}"
     history = cache.get(history_key, [])
 
-    history.append(f"User: {user_input}")
-    history.append(f"Bot: {bot_response}")
+    history.append(f"User question: {user_input}")
+    history.append(f"Chatbot answer: {bot_response}")
 
     # Trim to last 10 entries
     history = history[-10:]
 
-    cache.set(history_key, history, timeout=3600)  # 1 hour expiry
+    cache.set(history_key, history, timeout=7200)  # 2 hour expiry
 
 
 def query_mistral(prompt):
     """Query Mistral-Small-24B-Instruct-2501 model via vLLM"""
-    url = os.getenv('MISTRAL_URL')
+    url = os.getenv('MISTRAL_API')
     headers = {"Content-Type": "application/json"}
     data = {
         "model": "mistralai/Mistral-Small-24B-Instruct-2501",

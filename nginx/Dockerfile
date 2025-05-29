@@ -1,11 +1,9 @@
-# Production stage
 FROM nginx:alpine
 
-# Copy nginx config
+# Copy custom nginx config
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# Expose port
+# Expose port 80
 EXPOSE 80
 
-# Start nginx
 CMD ["nginx", "-g", "daemon off;"]

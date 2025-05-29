@@ -72,6 +72,38 @@ services:
     networks:
       - botforge
 
+  celery:
+    build:
+      context: ./djangoBackend
+    container_name: celery_worker
+    command: celery -A djangoBackend worker  --autoscale=8,4 --loglevel=INFO
+    depends_on:
+      - backend
+      - redis
+    environment:
+      - DJANGO_SECRET_KEY=django-insecure-scdejq5o2xs1&*ippxwuw)hao(l6cr@p1e3itn!q)ffbxr3slw
+      - DEBUG=False
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,backend,frontend
+      - POSTGRES_DB=botforge
+      - POSTGRES_USER=oussama
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_HOST=postgres-db
+      - POSTGRES_PORT=5432
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - SELINIUM=http://selenium-hub:4444/wd/hub
+      - CHROMA_HOST=chroma
+      - CHROMA_PORT=8000
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost,frontend
+      - CSRF_TRUSTED_ORIGINS=http://localhost:3000,http://localhost,frontend
+      - GOOGLE_CLIENT_ID=817599786977-sdkrqubmurk5adm9odstvvqqsa9a2956.apps.googleusercontent.com
+      - GOOGLE_SECRET=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
+      - GOOGLE_CALLBACK_URL=http://localhost:8000/accounts/google/login/callback/
+    volumes:
+      - ./djangoBackend:/app
+    networks:
+      - botforge
+
   # React Frontend with Nginx
   frontend:
     build:

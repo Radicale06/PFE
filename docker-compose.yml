@@ -59,7 +59,23 @@ services:
       dockerfile: Dockerfile
     container_name: react_frontend
     ports:
+      - "3000:3000"
+    networks:
+      - botforge
+
+  nginx:
+    container_name: nginx
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
       - "80:80"
+    volumes:
+      - static:/apps/backend/static
+
+    depends_on:
+      - backend
+      - frontend
     networks:
       - botforge
 
@@ -112,6 +128,7 @@ services:
 volumes:
   postgres_data:
   chroma_data:
+  static:
 
 networks:
   botforge:

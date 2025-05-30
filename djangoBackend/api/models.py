@@ -5,9 +5,9 @@ import secrets
 class ChatBot(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=100)
-    domain = models.TextField()
-    language = models.TextField()
-    style = models.TextField()
+    domain = models.CharField(max_length=100)
+    language = models.CharField(max_length=100)
+    style = models.CharField(max_length=100)
     company_name = models.CharField(max_length=100, default="")
     system_prompt = models.TextField(blank=True)
     is_deployed = models.BooleanField(default=False)

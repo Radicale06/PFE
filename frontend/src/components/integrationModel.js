@@ -21,6 +21,12 @@ const ChatbotActionModal = ({ onClose, onChooseOption }) => {
           >
             See Credentials
           </button>
+          <button
+            onClick={() => onChooseOption("documentation")}
+            className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-500"
+          >
+            Documentation
+          </button>
         </div>
         <button
           onClick={onClose}

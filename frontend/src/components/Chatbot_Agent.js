@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
 // SVG icons as components
 const SendIcon = () => (
   <svg
@@ -61,16 +62,36 @@ const CloseIcon = () => (
 );
 
 const FloatingChatbotCreator = ({ onChatbotCreated, onClose }) => {
+  // Get session_id and access_token from cookies
   const session_id = Cookies.get("session_id");
+  const access_token = Cookies.get("access_token");
+
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [createdChatbot, setCreatedChatbot] = useState(null);
-  const [isMinimized, setIsMinimized] = useState(false); // Start expanded
+  const [isMinimized, setIsMinimized] = useState(false);
   const messagesEndRef = useRef(null);
 
   // API endpoint
   const API_URL = `${API_BASE_URL}/api/chatbot-creator/`;
+
+  // Create axios config with auth header
+  const getAxiosConfig = () => {
+    return {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${access_token}`,
+      },
+    };
+  };
+
+  // Debug: Log tokens (remove in production)
+  useEffect(() => {
+    console.log("Session ID:", session_id);
+    console.log("Access Token:", access_token ? "Present" : "Missing");
+  }, [session_id, access_token]);
+
   // Initialize conversation on component mount
   useEffect(() => {
     startConversation();
@@ -93,16 +114,32 @@ const FloatingChatbotCreator = ({ onChatbotCreated, onClose }) => {
   const startConversation = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.post(API_URL, { message: "" });
+      const response = await axios.post(
+        API_URL,
+        {
+          message: "",
+          session_id: session_id,
+        },
+        getAxiosConfig()
+      );
       setMessages([{ sender: "bot", text: response.data.message }]);
     } catch (error) {
       console.error("Error starting conversation:", error);
-      setMessages([
-        {
-          sender: "bot",
-          text: "Error connecting to the chatbot creator service. Please try again later.",
-        },
-      ]);
+      if (error.response?.status === 403) {
+        setMessages([
+          {
+            sender: "bot",
+            text: "Please login to use the chatbot creator.",
+          },
+        ]);
+      } else {
+        setMessages([
+          {
+            sender: "bot",
+            text: "Error connecting to the chatbot creator service. Please try again later.",
+          },
+        ]);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -120,10 +157,14 @@ const FloatingChatbotCreator = ({ onChatbotCreated, onClose }) => {
 
     try {
       // Send message to backend
-      const response = await axios.post(API_URL, {
-        session_id: session_id,
-        message: userMessage,
-      });
+      const response = await axios.post(
+        API_URL,
+        {
+          session_id: session_id,
+          message: userMessage,
+        },
+        getAxiosConfig()
+      );
 
       // Add bot response to chat if there's a message
       if (response.data.message) {
@@ -140,13 +181,25 @@ const FloatingChatbotCreator = ({ onChatbotCreated, onClose }) => {
       }
     } catch (error) {
       console.error("Error sending message:", error);
-      setMessages((prev) => [
-        ...prev,
-        {
-          sender: "bot",
-          text: "Sorry, there was an error processing your request. Please try again.",
-        },
-      ]);
+
+      // Handle authentication errors
+      if (error.response?.status === 403) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: "bot",
+            text: "Authentication failed. Please login again.",
+          },
+        ]);
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: "bot",
+            text: "Sorry, there was an error processing your request. Please try again.",
+          },
+        ]);
+      }
     } finally {
       setIsLoading(false);
     }

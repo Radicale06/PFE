@@ -20,7 +20,6 @@ const App = () => {
 
       Cookies.set("session_id", newSessionId, {
         expires: expirationTime,
-        secure: true,
         sameSite: "Strict",
       });
     }

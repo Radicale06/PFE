@@ -8,6 +8,7 @@ import CredentialsModel from "../components/CredenetialsModel";
 import ChatbotActionModal from "../components/integrationModel";
 import AnalyticsChart from "../components/AnalyticsChart"; // adjust the path if needed
 import FloatingChatbotCreator from "../components/Chatbot_Agent"; // Import the floating chatbot creator
+import APIExamplesModal from "../components/documentation";
 
 import {
   BeakerIcon,
@@ -31,6 +32,7 @@ const Dashboard = () => {
   const [activeSection, setActiveSection] = useState("home"); // Track active section
   const [selectedAction, setSelectedAction] = useState(null);
   const [showCredentialsModal, setShowCredentialsModal] = useState(false);
+  const [showDocumentationModal, setshowDocumentationModal] = useState(false);
   // Start with chat assistant always visible
   const [showChatAssistant, setShowChatAssistant] = useState(true);
 
@@ -75,11 +77,18 @@ const Dashboard = () => {
     } else if (action === "see-credentials") {
       // Trigger the modal to open
       setShowCredentialsModal(true); // Show the credentials modal
+    } else if (action === "documentation") {
+      // Trigger the modal to open
+      setshowDocumentationModal(true); // Show the credentials modal
     }
   };
 
   const handleCloseModal = () => {
     setShowCredentialsModal(false); // Close the modal
+  };
+
+  const handleDocCloseModal = () => {
+    setshowDocumentationModal(false); // Close the modal
   };
 
   return (
@@ -266,6 +275,12 @@ const Dashboard = () => {
                 <CredentialsModel
                   chatbotid={selectedDepChatbot.id}
                   onClose={handleCloseModal}
+                />
+              )}
+              {showDocumentationModal && (
+                <APIExamplesModal
+                  chatbotid={selectedDepChatbot.id}
+                  onClose={handleDocCloseModal}
                 />
               )}
             </div>

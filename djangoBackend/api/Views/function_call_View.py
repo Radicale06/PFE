@@ -1,5 +1,6 @@
 import json
 import uuid
+import os
 import logging
 import requests
 from rest_framework.views import APIView
@@ -8,33 +9,38 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.core.cache import cache
 from django.contrib.auth import get_user_model
 from ..models import ChatBot
-from .ChatBot_View import DEFAULT_PROMPT_AR,DEFAULT_PROMPT_EN,DEFAULT_PROMPT_FR
+from .Templating_View import DEFAULT_PROMPT_FR,DEFAULT_PROMPT_EN,DEFAULT_PROMPT_AR
+from dotenv import load_dotenv
+load_dotenv()
 
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 # Mistral API details
-API_URL = "http://217.182.211.152:8000/v1/chat/completions"
+API_URL = os.getenv('MISTRAL_API')
 MODEL = "mistralai/Mistral-Small-24B-Instruct-2501"
 
 User = get_user_model()
-DEFAULT_USER_ID = 2  # Static user ID to use for creating chatbots
+
 
 
 class ChatbotCreatorView(APIView):
-    permission_classes = [AllowAny]
-    authentication_classes = []
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         # Get data from request
+        user = request.user
+        print(user)
         data = request.data
         message = data.get("message", "").strip()
         session_id = data.get("session_id")
 
         # Get conversation history from cache
         conversation_key = f"chatbot_creator_{session_id}"
-        conversation_history = cache.get(session_id, [])
+        print(conversation_key)
+        conversation_history = cache.get(conversation_key, [])
+        print(conversation_history)
 
         # First interaction - send greeting
         if not message:
@@ -44,7 +50,7 @@ class ChatbotCreatorView(APIView):
                 "Would you like to create a chatbot today?"
             )
             conversation_history.append({"role": "assistant", "content": greeting})
-            cache.set(conversation_key, conversation_history, timeout=7200)
+            cache.set(conversation_key, conversation_history, timeout=3000)
             return Response({"message": greeting})
 
         # Add user message to history
@@ -164,12 +170,12 @@ class ChatbotCreatorView(APIView):
                             "name") == "create_chatbot":
                         try:
                             arguments = json.loads(tool_call.get("function", {}).get("arguments", "{}"))
-                            if all(key in arguments for key in ["name", "domain", "language", "style"]):
+                            if all(key in arguments for key in ["name", "company_name", "domain", "language", "style"]):
                                 function_called = True
                                 chatbot_data = arguments
 
                                 # Create the chatbot directly in the database
-                                created_chatbot = self._create_chatbot(arguments)
+                                created_chatbot = self._create_chatbot(chatbot_data, user)
 
                                 # Create a message to return to the user
                                 message_to_return = (
@@ -217,36 +223,73 @@ class ChatbotCreatorView(APIView):
             logger.error(f"Exception: {str(e)}")
             return Response({"session_id": session_id, "message": f"Unexpected error occurred: {str(e)}"})
 
-    def _create_chatbot(self, chatbot_data):
-        """Create a chatbot in the database using the provided specifications"""
+    def _create_chatbot(self, chatbot_data, user):
+        print(f"User: {user}")
+        print(f"Chatbot data: {chatbot_data}")
+
         try:
-            # Get the default user to assign as creator
-            user = User.objects.get(id=DEFAULT_USER_ID)  # Use the static user ID
+            # Extract fields with validation
+            name = chatbot_data.get('name')
+            domain = chatbot_data.get('domain')
+            language = chatbot_data.get('language')
+            style = chatbot_data.get('style')
+            company_name = chatbot_data.get('company_name')
+
+            print(
+                f"Fields - Name: '{name}', Domain: '{domain}', Language: '{language}', Style: '{style}', Company: '{company_name}'")
+
+            # Check if any field is None or empty
+            if not name:
+                raise Exception("Name is required")
+            if not domain:
+                raise Exception("Domain is required")
+            if not language:
+                raise Exception("Language is required")
+            if not style:
+                raise Exception("Style is required")
+            if not company_name:
+                raise Exception("Company name is required")
+
+            # Get language prompt
             language_prompts = {
                 'English': DEFAULT_PROMPT_EN,
                 'French': DEFAULT_PROMPT_FR,
                 'Arabic': DEFAULT_PROMPT_AR
             }
-            system_prompt = language_prompts.get(chatbot_data['language'], DEFAULT_PROMPT_EN)
-            final_prompt = system_prompt.format(company_name=chatbot_data['company_name'])
+            system_prompt = language_prompts.get(language, DEFAULT_PROMPT_EN)
 
-            # Create and save the chatbot
+            if not system_prompt:
+                raise Exception(f"No prompt template found for language: {language}")
+
+            try:
+                final_prompt = system_prompt.format(company_name=company_name, domain=domain, language=language, style=style )
+            except Exception as format_error:
+                print(f"Error formatting prompt: {format_error}")
+                final_prompt = system_prompt  # Use unformatted as fallback
+
+            print(f"Creating chatbot with user: {user}, user.id: {user.id}")
+
+            # Create chatbot
             chatbot = ChatBot(
-                name=chatbot_data['name'],
-                company_name=chatbot_data['company_name'],
-                domain=chatbot_data['domain'],
-                language=chatbot_data['language'],
-                style=chatbot_data['style'],
+                name=name,
+                domain=domain,
+                language=language,
+                style=style,
+                company_name=company_name,
                 system_prompt=final_prompt,
                 creator=user
             )
+
+            print(f"ChatBot object created, attempting to save...")
+            chatbot.full_clean()  # Validate before saving
             chatbot.save()
 
-            logger.info(f"Chatbot created with ID: {chatbot.id}")
+            logger.info(f"Chatbot created successfully with ID: {chatbot.id}")
             return chatbot
 
-        except User.DoesNotExist:
-            raise Exception(f"User with ID {DEFAULT_USER_ID} not found. Cannot create chatbot.")
         except Exception as e:
-            logger.error(f"Error creating chatbot: {str(e)}")
+            import traceback
+            full_error = traceback.format_exc()
+            logger.error(f"Full error traceback: {full_error}")
+            print(f"Full error traceback: {full_error}")
             raise Exception(f"Failed to create chatbot: {str(e)}")

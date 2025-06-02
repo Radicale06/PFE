@@ -29,7 +29,7 @@ def _fetch_sitemap_content_silent(sitemap_url: str, session: requests.Session):
         return None
 
 
-def _parse_sitemap_xml_silent(xml_content: bytes) -> tuple[list[str], list[str]]:
+def _parse_sitemap_xml_silent(xml_content):
     page_urls = []
     child_sitemap_urls = []
     if not xml_content:

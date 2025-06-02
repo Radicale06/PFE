@@ -15,6 +15,7 @@ import {
 } from "react-icons/fi";
 import { useLocation, useNavigate } from "react-router-dom";
 import handleModalSubmit from "../Services/HandleDocuments";
+import handleWebsiteScrape from "../Services/handlewebsite";
 import handleTableSubmit from "../Services/handleDB";
 import Cookies from "js-cookie";
 import DeployModal from "../components/DeployModal";
@@ -38,6 +39,9 @@ const Studio = () => {
   const [documents, setDocuments] = useState([]);
   const [isLoadingDocuments, setIsLoadingDocuments] = useState(false);
   const [documentsError, setDocumentsError] = useState(null);
+
+  // Website URL state
+  const [websiteUrl, setWebsiteUrl] = useState("");
 
   // Database connection states
   const [selectedDbType, setSelectedDbType] = useState("MySQL");
@@ -215,8 +219,17 @@ const Studio = () => {
       } catch (error) {
         console.error("Error connecting to database:", error);
       }
-    } else if (selectedSource !== "Document") {
-      alert(`Data submitted for ${selectedSource}`);
+    } else if (selectedSource === "Website" && websiteUrl.trim()) {
+      try {
+        await handleWebsiteScrape(websiteUrl, chatbot.id);
+        setIsModalOpen(false);
+        setWebsiteUrl(""); // Reset the URL input
+        fetchDocuments(); // Refresh documents list in case website content was added
+        alert("Website content scraped successfully!");
+      } catch (error) {
+        console.error("Error scraping website:", error);
+        alert("Error scraping website: " + error.message);
+      }
     }
   };
 
@@ -435,9 +448,9 @@ const Studio = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-900 text-white">
+    <div className="flex h-screen bg-gray-900 text-white overflow-y-auto">
       {/* Sidebar */}
-      <aside className="w-64 bg-gray-800 p-4 flex flex-col">
+      <aside className="w-1/4 bg-gray-800 p-4 flex flex-col">
         <h1 className="text-xl font-bold flex items-center gap-2 mb-6">
           <FiMonitor /> BotForge
         </h1>
@@ -636,7 +649,7 @@ const Studio = () => {
       </div>
 
       {/* Emulator Panel */}
-      <aside className="w-1/3 bg-gray-800 p-4 flex flex-col">
+      <aside className="w-1/4 bg-gray-800 p-4 flex flex-col">
         <h2 className="text-lg font-bold flex items-center gap-2">
           <FiMessageCircle /> Chatbot Emulator
         </h2>
@@ -812,11 +825,39 @@ const Studio = () => {
                 </div>
               </div>
             ) : (
-              <input
-                type="text"
-                className="w-full p-2 rounded-lg text-black mb-4"
-                placeholder={`Enter ${selectedSource} URL or data`}
-              />
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Website URL
+                  </label>
+                  <input
+                    type="url"
+                    className="w-full p-2 rounded-lg bg-gray-700 text-white border border-gray-600"
+                    placeholder="Enter website URL (e.g., https://example.com)"
+                    value={websiteUrl}
+                    onChange={(e) => setWebsiteUrl(e.target.value)}
+                  />
+                </div>
+                <div className="p-3 bg-gray-700 rounded-lg">
+                  <h3 className="text-sm font-semibold mb-2">
+                    Website Scraping Info:
+                  </h3>
+                  <div className="text-xs text-gray-400 space-y-1">
+                    <p>
+                      • Enter a valid URL starting with http:// , https:// or
+                      www
+                    </p>
+                    <p>
+                      • The system will extract text content from all Webpages
+                      of the website
+                    </p>
+                    <p>
+                      • Scraped content will be added to your chatbot's
+                      knowledge base
+                    </p>
+                  </div>
+                </div>
+              </div>
             )}
 
             <div className="flex justify-end mt-4">
@@ -824,6 +865,7 @@ const Studio = () => {
                 className="bg-gray-600 px-4 py-2 rounded-lg mr-2 hover:bg-gray-700 transition"
                 onClick={() => {
                   setIsModalOpen(false);
+                  setWebsiteUrl(""); // Reset website URL
                   if (selectedSource === "Table") {
                     setDbCredentials({
                       host: "",
@@ -843,16 +885,22 @@ const Studio = () => {
                 Cancel
               </button>
               <button
-                className="bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+                className="bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleSubmit}
                 disabled={
-                  selectedSource === "Table" &&
-                  getRequiredFields(selectedDbType).some(
-                    (field) => !dbCredentials[field]
-                  )
+                  (selectedSource === "Table" &&
+                    getRequiredFields(selectedDbType).some(
+                      (field) => !dbCredentials[field]
+                    )) ||
+                  (selectedSource === "Website" && !websiteUrl.trim()) ||
+                  (selectedSource === "Document" && !file)
                 }
               >
-                {selectedSource === "Table" ? "Connect & Import" : "Submit"}
+                {selectedSource === "Table"
+                  ? "Connect & Import"
+                  : selectedSource === "Website"
+                  ? "Scrape Website"
+                  : "Submit"}
               </button>
             </div>
           </div>

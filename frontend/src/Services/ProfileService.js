@@ -11,7 +11,7 @@ export const getUserProfile = async () => {
       throw new Error("No access token found");
     }
 
-    const response = await fetch(`${API_BASE_URL}/profile/`, {
+    const response = await fetch(`${API_BASE_URL}/api/profile/`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -45,7 +45,7 @@ export const updateUserProfile = async (profileData) => {
       throw new Error("No access token found");
     }
 
-    const response = await fetch(`${API_BASE_URL}/profile/update/`, {
+    const response = await fetch(`${API_BASE_URL}/api/profile/update/`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

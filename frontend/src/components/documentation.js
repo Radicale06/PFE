@@ -28,26 +28,33 @@ const APIExamplesModal = ({ chatbotid, onClose }) => {
   const getCodeExample = (framework) => {
     const examples = {
       python: `import requests
-
+import uuid
 API_URL = "${API_URL}"
 TOKEN = "${TOKEN}"
+data = {
+    "message": "Hello, can you help in ...?",
+    "session_id": "123e4567-e89b-12d3-a456-426614174000", # Session ID is mandatory
+    "token": TOKEN
+}
 
-headers = {"Authorization": f"Bearer {TOKEN}"}
-data = {"message": "Hello!"}
-
-response = requests.post(API_URL, headers=headers, json=data)
+response = requests.post(API_URL, json=data)
 print(response.json())`,
 
-      javascript: `const API_URL = "${API_URL}";
-const TOKEN = "${TOKEN}";
+      javascript: `API_URL = "${API_URL}"
+TOKEN = "${TOKEN}"
+  const response = await fetch(API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      message: "Hello, can you help in ...?",
+      session_id: "123e4567-e89b-12d3-a456-426614174000", // Session ID is mandatory
+      token: TOKEN
+    })
+  });
 
-fetch(API_URL, {
-    method: 'POST',
-    headers: {'Authorization': \`Bearer \${TOKEN}\`},
-    body: JSON.stringify({message: "Hello!"})
-})
-.then(response => response.json())
-.then(data => console.log(data));`,
+  const result = await response.json();`,
     };
 
     return examples[framework] || "";

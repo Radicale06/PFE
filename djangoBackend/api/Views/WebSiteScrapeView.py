@@ -25,7 +25,9 @@ class ScrapeFromSitemapView(APIView):
             parsed = url.lower()
             try:
                 path = urlparse(url).path
-                raw_name = os.path.splitext(os.path.basename(path)) or 'scraped'
+                print("path: ",path)
+                raw_name, _ = os.path.splitext(os.path.basename(path)) or 'scraped'
+                print("raw_name: ",raw_name)
 
                 if parsed.endswith('.pdf') or parsed.endswith('.txt'):
                     ext = '.pdf' if parsed.endswith('.pdf') else '.txt'

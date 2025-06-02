@@ -126,22 +126,6 @@ const Dashboard = () => {
               <BeakerIcon className="h-6 w-6" />
               <span>Analytics</span>
             </a>
-            <a
-              onClick={() => handleSidebarClick("billing")}
-              className={`flex items-center space-x-2 text-gray-300 hover:text-white transition-all duration-300 py-2 px-4 rounded-md ${
-                activeSection === "billing" ? "bg-blue-800 shadow-lg" : ""
-              }`}
-            >
-              <UserGroupIcon className="h-6 w-6" /> <span>Billing</span>
-            </a>
-            <a
-              onClick={() => handleSidebarClick("settings")}
-              className={`flex items-center space-x-2 text-gray-300 hover:text-white transition-all duration-300 py-2 px-4 rounded-md ${
-                activeSection === "settings" ? "bg-blue-800 shadow-lg" : ""
-              }`}
-            >
-              <CogIcon className="h-6 w-6" /> <span>Settings</span>
-            </a>
           </nav>
         </aside>
 

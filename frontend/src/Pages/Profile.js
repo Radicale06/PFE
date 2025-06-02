@@ -6,7 +6,7 @@ import {
   getUserProfile,
   updateUserProfile,
   changePassword,
-} from "../Services/ProfileService"; // Fixed: lowercase path
+} from "../Services/ProfileService"; // Updated: lowercase path to match your service file
 
 const EditProfile = () => {
   const [profilePic, setProfilePic] = useState(null);
@@ -45,14 +45,24 @@ const EditProfile = () => {
           }
         }
 
-        // Then fetch latest data from API
+        // Then fetch latest data from API using your service
         const profileData = await getUserProfile();
         console.log("Profile data from API:", profileData);
 
+        // Update state with fresh data from API
         setFirstName(profileData.first_name || "");
         setLastName(profileData.last_name || "");
         setEmail(profileData.email || "");
         setProfilePic(profileData.profile_picture || null);
+
+        // Update localStorage with fresh data
+        const updatedUserData = {
+          first_name: profileData.first_name || "",
+          last_name: profileData.last_name || "",
+          email: profileData.email || "",
+          profile_picture: profileData.profile_picture || null,
+        };
+        localStorage.setItem("user_data", JSON.stringify(updatedUserData));
       } catch (error) {
         console.error("Error loading profile:", error);
         setError(`Failed to load profile data: ${error.message}`);
@@ -66,7 +76,10 @@ const EditProfile = () => {
 
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
-      setProfilePic(URL.createObjectURL(e.target.files[0]));
+      const file = e.target.files[0];
+      setProfilePic(URL.createObjectURL(file));
+      // Note: You might want to handle file upload to your backend here
+      // This currently only creates a local preview
     }
   };
 
@@ -78,13 +91,20 @@ const EditProfile = () => {
       return false;
     }
 
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address");
+      return false;
+    }
+
     if (password && password !== repassword) {
       setError("New passwords do not match");
       return false;
     }
 
     if (password && !oldPassword) {
-      setError("Old password is required to change password");
+      setError("Current password is required to change password");
       return false;
     }
 
@@ -114,14 +134,15 @@ const EditProfile = () => {
         email: email,
       });
 
-      // Update profile information
+      // Update profile information using your service
       const profileData = {
         first_name: firstName,
         last_name: lastName,
         email: email,
       };
 
-      await updateUserProfile(profileData);
+      const updatedProfile = await updateUserProfile(profileData);
+      console.log("Profile updated successfully:", updatedProfile);
 
       // Change password if provided
       if (password) {
@@ -131,6 +152,7 @@ const EditProfile = () => {
           new_password: password,
         };
         await changePassword(passwordData);
+        console.log("Password changed successfully");
 
         // Clear password fields after successful change
         setOldPassword("");
@@ -147,7 +169,16 @@ const EditProfile = () => {
       };
       localStorage.setItem("user_data", JSON.stringify(updatedUserData));
 
-      setSuccess("Profile updated successfully!");
+      setSuccess(
+        password
+          ? "Profile and password updated successfully!"
+          : "Profile updated successfully!"
+      );
+
+      // Auto-hide success message after 5 seconds
+      setTimeout(() => {
+        setSuccess("");
+      }, 5000);
     } catch (error) {
       console.error("Update error:", error);
       setError(error.message || "Failed to update profile");
@@ -158,12 +189,12 @@ const EditProfile = () => {
 
   if (loading) {
     return (
-      <div>
+      <div className="min-h-screen bg-gray-900 text-white">
         <HeaderChange name="Edit Profile" />
-        <div className="min-h-screen bg-gray-900 text-white flex justify-center items-center">
+        <div className="flex justify-center items-center min-h-[80vh]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-            <p>Loading profile...</p>
+            <p className="text-gray-300">Loading profile...</p>
           </div>
         </div>
       </div>
@@ -171,24 +202,25 @@ const EditProfile = () => {
   }
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-900 text-white">
       <HeaderChange name="Edit Profile" />
-      <div className="min-h-screen bg-gray-900 text-white flex justify-center items-center p-6">
+      <div className="flex justify-center items-start p-6 min-h-screen">
         <div className="bg-gray-800 p-10 rounded-lg shadow-lg w-full max-w-3xl">
           <h2 className="text-3xl font-bold text-center mb-8">
             Edit Your Profile
           </h2>
 
           {error && (
-            <div className="bg-red-600 text-white p-3 rounded-md mb-6">
+            <div className="bg-red-600 text-white p-4 rounded-md mb-6">
               <p className="font-medium">Error:</p>
               <p>{error}</p>
             </div>
           )}
 
           {success && (
-            <div className="bg-green-600 text-white p-3 rounded-md mb-6">
-              {success}
+            <div className="bg-green-600 text-white p-4 rounded-md mb-6">
+              <p className="font-medium">Success!</p>
+              <p>{success}</p>
             </div>
           )}
 
@@ -222,7 +254,7 @@ const EditProfile = () => {
                   type="text"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  className="mt-1 block w-full bg-gray-700 text-white px-4 py-2 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="mt-1 block w-full bg-gray-700 text-white px-4 py-3 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Enter first name"
                   required
                 />
@@ -235,7 +267,7 @@ const EditProfile = () => {
                   type="text"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  className="mt-1 block w-full bg-gray-700 text-white px-4 py-2 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="mt-1 block w-full bg-gray-700 text-white px-4 py-3 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Enter last name"
                   required
                 />
@@ -250,7 +282,7 @@ const EditProfile = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full bg-gray-700 text-white px-4 py-2 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="mt-1 block w-full bg-gray-700 text-white px-4 py-3 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Enter email"
                 required
               />
@@ -261,6 +293,10 @@ const EditProfile = () => {
               <h3 className="text-xl font-semibold mb-4 text-gray-200">
                 Change Password (Optional)
               </h3>
+              <p className="text-gray-400 text-sm mb-4">
+                Leave password fields empty if you don't want to change your
+                password
+              </p>
 
               <div className="space-y-4">
                 <div>
@@ -271,7 +307,7 @@ const EditProfile = () => {
                     type="password"
                     value={oldPassword}
                     onChange={(e) => setOldPassword(e.target.value)}
-                    className="mt-1 block w-full bg-gray-700 text-white px-4 py-2 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="mt-1 block w-full bg-gray-700 text-white px-4 py-3 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Enter current password"
                   />
                 </div>
@@ -285,8 +321,9 @@ const EditProfile = () => {
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="mt-1 block w-full bg-gray-700 text-white px-4 py-2 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="mt-1 block w-full bg-gray-700 text-white px-4 py-3 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Enter new password"
+                      minLength="6"
                     />
                   </div>
 
@@ -298,19 +335,27 @@ const EditProfile = () => {
                       type="password"
                       value={repassword}
                       onChange={(e) => setRepassword(e.target.value)}
-                      className="mt-1 block w-full bg-gray-700 text-white px-4 py-2 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="mt-1 block w-full bg-gray-700 text-white px-4 py-3 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Confirm new password"
+                      minLength="6"
                     />
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-end pt-6">
+            <div className="flex flex-col sm:flex-row justify-end gap-3 pt-6">
+              <button
+                type="button"
+                onClick={() => window.history.back()}
+                className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-md transition"
+              >
+                Cancel
+              </button>
               <button
                 type="submit"
                 disabled={updating}
-                className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-6 py-2 rounded-md transition flex items-center"
+                className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white px-6 py-3 rounded-md transition flex items-center justify-center"
               >
                 {updating ? (
                   <>

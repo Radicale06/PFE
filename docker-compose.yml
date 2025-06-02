@@ -41,6 +41,8 @@ services:
       context: ./djangoBackend
       dockerfile: Dockerfile
     container_name: django_backend
+    env_file:
+      - ./djangoBackend/.env
     ports:
       - "8000:8000"
     depends_on:

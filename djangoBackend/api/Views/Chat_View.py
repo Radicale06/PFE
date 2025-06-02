@@ -21,42 +21,47 @@ class QueryView(APIView):
             chatbot_id = data.get("chatbot_id")
             session_id = data.get("session_id")  # Unique session identifier
             chatbot = ChatBot.objects.get(id=chatbot_id)
+            print("chatbot",chatbot)
 
 
             # Retrieve relevant document from ChromaDB
+            print("getting relevant documents")
             doc_result = get_doc_from_chroma(query, chatbot_id)
             context = doc_result["documents"][0] if doc_result["documents"] else "No relevant context found."
-
+            print("finished")
             # Retrieve chat history
+            print("getting chat history")
             chat_history = get_chat_history(session_id)
-
+            print("finished")
             # Select prompt template based on language
             if chatbot.language == "English":
+                print("language: English")
                 prompt_template = chatbot.system_prompt
-                prompt_template + "/n" + """**KNOWLEDGE BASE CONTEXT:**
+                prompt_template = (prompt_template + "\n" + """**KNOWLEDGE BASE CONTEXT:**
                 {context}
                 **CONVERSATION HISTORY:**
                 {chat_history}
                 **CUSTOMER QUERY:**
-                {query}"""
+                {query}""")
             elif chatbot.language == "French":
                 prompt_template = chatbot.system_prompt
-                prompt_template + "/n" + """**CONTEXTE DE LA BASE DE CONNAISSANCES:**
+                prompt_template = (prompt_template + "/n" + """**CONTEXTE DE LA BASE DE CONNAISSANCES:**
                 {context}
                 **HISTORIQUE DE CONVERSATION:**
                 {chat_history}
                 **QUESTION DU CLIENT:**
-                {query}"""
+                {query}""")
             else:  # Arabic
                 prompt_template = chatbot.system_prompt
-                prompt_template + "/n" + """**سياق قاعدة المعرفة:**
+                prompt_template = (prompt_template + "/n" + """**سياق قاعدة المعرفة:**
                 {context}
                 **تاريخ المحادثة:**
                 {chat_history}
                 **استفسار العميل:**
-                {query}"""
+                {query}""")
 
             # Apply the COSTAR structured prompt
+
             final_prompt = prompt_template.format(
                 chat_history=chat_history,
                 context=context,

@@ -7,7 +7,7 @@ def get_doc_from_chroma(querry, chatbot_id):
     collections = chroma_client.get_collection("BotForge")
     results = collections.query(
         query_texts=[querry],
-        n_results=1,
+        n_results=2,
         where={"chatbot_id": {"$eq": chatbot_id}}
     )
     return results

@@ -86,12 +86,6 @@ const FloatingChatbotCreator = ({ onChatbotCreated, onClose }) => {
     };
   };
 
-  // Debug: Log tokens (remove in production)
-  useEffect(() => {
-    console.log("Session ID:", session_id);
-    console.log("Access Token:", access_token ? "Present" : "Missing");
-  }, [session_id, access_token]);
-
   // Initialize conversation on component mount
   useEffect(() => {
     startConversation();
@@ -176,7 +170,6 @@ const FloatingChatbotCreator = ({ onChatbotCreated, onClose }) => {
 
       // Check if chatbot was created
       if (response.data.function_called && response.data.chatbot) {
-        console.log("Chatbot created:", response.data.chatbot);
         setCreatedChatbot(response.data.chatbot);
       }
     } catch (error) {

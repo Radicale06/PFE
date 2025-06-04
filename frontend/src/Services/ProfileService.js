@@ -87,7 +87,7 @@ export const changePassword = async (passwordData) => {
       throw new Error("No access token found");
     }
 
-    const response = await fetch(`${API_BASE_URL}/change-password/`, {
+    const response = await fetch(`${API_BASE_URL}/api/change-password/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

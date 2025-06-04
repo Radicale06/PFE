@@ -74,13 +74,13 @@ DEFAULT_PROMPT_AR = """
 - استخدم النقاط أو القوائم المرقمة للإجراءات المعقدة
 - حافظ على الردود تحت 200 كلمة إلا إذا تطلبت الشرح المفصل
 """
-
+import os
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.shortcuts import get_object_or_404
-from ..models import ChatBot
+from ..models import ChatBot, Document
 
 
 class ChatBotManagementView(APIView):
@@ -134,6 +134,13 @@ class ChatBotManagementView(APIView):
         try:
             # Get the chatbot instance
             chatbot = get_object_or_404(ChatBot, id=chatbot_id)
+            documents = Document.objects.filter(chatbot=chatbot)
+
+            for doc in documents:
+                if doc.file and os.path.isfile(doc.file.path):
+                    os.remove(doc.file.path)
+
+            documents.delete()
 
             # Check if user owns this chatbot (optional security check)
             if chatbot.creator != request.user:

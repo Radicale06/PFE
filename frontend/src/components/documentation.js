@@ -40,7 +40,7 @@ data = {
 response = requests.post(API_URL, json=data)
 print(response.json())`,
 
-      javascript: `API_URL = "${API_URL}"
+      javascript: `URL = "${API_URL}"
 TOKEN = "${TOKEN}"
   const response = await fetch(API_URL, {
     method: "POST",

@@ -21,21 +21,15 @@ class QueryView(APIView):
             chatbot_id = data.get("chatbot_id")
             session_id = data.get("session_id")  # Unique session identifier
             chatbot = ChatBot.objects.get(id=chatbot_id)
-            print("chatbot",chatbot)
 
 
             # Retrieve relevant document from ChromaDB
-            print("getting relevant documents")
             doc_result = get_doc_from_chroma(query, chatbot_id)
             context = doc_result["documents"][0] if doc_result["documents"] else "No relevant context found."
-            print("finished")
             # Retrieve chat history
-            print("getting chat history")
             chat_history = get_chat_history(session_id)
-            print("finished")
             # Select prompt template based on language
             if chatbot.language == "English":
-                print("language: English")
                 prompt_template = chatbot.system_prompt
                 prompt_template = (prompt_template + "\n" + """**KNOWLEDGE BASE CONTEXT:**
                 {context}

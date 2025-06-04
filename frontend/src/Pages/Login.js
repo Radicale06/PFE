@@ -130,14 +130,6 @@ const Login = () => {
               />
             </GoogleOAuthProvider>
             ,
-            <button className="w-1/2 flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-              <img
-                src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg"
-                alt="Microsoft"
-                className="h-5 w-5 mr-2"
-              />
-              Microsoft
-            </button>
           </div>
         </div>
 
